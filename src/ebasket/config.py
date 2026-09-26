@@ -37,6 +37,8 @@ class DetectorSettings(BaseModel):
     stale_after_s: int = Field(180, ge=30)
     outage_hold_after_s: int = Field(1200, ge=60)
     max_game_duration_h: float = Field(4.0, ge=2.5)
+    min_final_after_tip_min: int = Field(70, ge=45)
+    min_halftime_after_tip_min: int = Field(20, ge=15)
 
     def to_config(self) -> DetectorConfig:
         return DetectorConfig(
@@ -45,6 +47,8 @@ class DetectorSettings(BaseModel):
             stale_after=timedelta(seconds=self.stale_after_s),
             outage_hold_after=timedelta(seconds=self.outage_hold_after_s),
             max_game_duration=timedelta(hours=self.max_game_duration_h),
+            min_final_after_tip=timedelta(minutes=self.min_final_after_tip_min),
+            min_halftime_after_tip=timedelta(minutes=self.min_halftime_after_tip_min),
         )
 
 

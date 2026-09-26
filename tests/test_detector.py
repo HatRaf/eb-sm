@@ -161,6 +161,23 @@ def test_source_outage_during_game_is_held():
 # -- timing ---------------------------------------------------------------------
 
 
+def test_final_before_tip_off_is_held():
+    # A fixture in the future cannot already be final, however consistent the source is.
+    d = decide(finals(-30), -28.5)
+    assert (d.outcome, d.reason) == (Outcome.HOLD, Reason.IMPLAUSIBLE_TIMING)
+
+
+def test_final_implausibly_soon_after_tip_off_is_held():
+    d = decide(finals(35), 36.5)
+    assert (d.outcome, d.reason) == (Outcome.HOLD, Reason.IMPLAUSIBLE_TIMING)
+
+
+def test_halftime_implausibly_soon_after_tip_off_is_held():
+    history = [obs(10 + i * 0.75, Status.HALFTIME, HALF) for i in range(3)]
+    d = decide(history, 11.5, kind=HALFTIME)
+    assert (d.outcome, d.reason) == (Outcome.HOLD, Reason.IMPLAUSIBLE_TIMING)
+
+
 def test_before_tip_off_waits():
     assert decide([], -20).reason is Reason.AWAITING_DATA
     assert decide([obs(-20, Status.SCHEDULED, score=(0, 0), periods=())], -20).reason is Reason.NOT_STARTED

@@ -106,6 +106,9 @@ Every source response becomes an `Observation` (the spec's record plus fetch met
 rules. If the game resumes before confirmation, the event is held with reason `window_passed`
 (reported in the nightly summary, not as an urgent alert).
 
+Chronology: a `FINAL` first reported less than 70 min after scheduled tip-off (or before it), or a
+`HALFTIME` less than 20 min after, is held as `implausible_timing` however consistent the source is.
+
 Hold triggers (each with a machine-readable reason): stale source, team change vs fixture,
 score decreasing or changing inside the window, `POSTPONED/CANCELLED/ABANDONED/UNKNOWN`,
 no final state by `start + max_game_duration` (default 4 h), unmapped team, missing/unapproved
@@ -122,14 +125,22 @@ second post or replacement.
   interval (per-adapter minimum floor, config cannot go below it); stop after `FINAL` + correction window.
 - On restart the worker does **not** rely on schedules having fired: it selects every covered match with
   `start_utc` in the last 24 h that has no terminal event and polls it immediately (catch-up).
-- Jobs found in `publishing` at start-up become `publish_unknown` (we can't know if the request left).
+- Jobs found in `publishing` at worker start-up become `publish_unknown` (we can't know if the request left).
+  This runs in worker start-up only, before any publish/reconcile — never merely on opening the ledger,
+  so `ebasket status` during a publish can't disturb it.
+- Fixture refreshes only apply *safe* updates (filling in unmapped team IDs; a reschedule before anything
+  is confirmed or held). Different teams, replaced canonical IDs, or a reschedule after progress are staged
+  in `fixture_changes`, the stored fixture is left untouched, and the match's open events and pre-publish
+  jobs are held in the same transaction. In-flight/published jobs are left to reconciliation/corrections.
 - A heartbeat (`last_tick_utc`) is written every loop; `ebasket health` (Docker `HEALTHCHECK`) fails if it is
   older than 3× the loop interval or the DB isn't writable.
 
 ## 6. Jobs, states and duplicate safety
 
-Job key: `competition:season:source_match_id:event:platform:format`
-(e.g. `EUROLEAGUE:2026-27:E2026_12:FINAL:instagram:feed-4x5`). Unique in the ledger.
+Job key: `competition:season:source:source_match_id:event:platform:format`
+(e.g. `EUROLEAGUE:2026-27:euroleague-incrowd:E2026_12:FINAL:instagram:feed-4x5`). Unique in the ledger.
+The spec's key plus the source, so two providers' match IDs can never collide (schema v2 migrated old keys).
+A job's identity is derived inside the ledger from the event's stored match — never from caller input.
 A second guard, the *natural key* (competition, Athens calendar day, canonical teams, event, destination),
 catches the same game arriving under a new source ID (e.g. after switching score source); such a job is
 created `held` with reason `possible_duplicate`.
@@ -150,6 +161,11 @@ any step failure ─► held(reason)
 - `publish_unknown` is never blindly retried: `Publisher.reconcile()` asks the platform first; if still
   uncertain → alert Elena, wait for a manual `resolve`.
 - `shadowed` is a separate terminal state so shadow history can never be mistaken for a real post.
+- A state name is not proof of content: the ledger refuses `rendered` without all render artifacts
+  (caption, image path + SHA-256, template id/version, renderer version, asset-manifest hash), refuses to
+  change them afterwards, and a manual retry clears them so the job must be rendered again. The Validator
+  (M3) is the only code path to `ready`; the publisher re-checks score, assets, hash, deadline and pause
+  immediately before the platform call (M4/M6).
 - Late-post guard: a `ready` job older than `max_post_delay` (e.g. after a long pause) is held, not posted.
 
 ## 7. Modes and the live gate

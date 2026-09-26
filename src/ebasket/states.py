@@ -66,9 +66,12 @@ def check_event_transition(current: EventState, to: EventState) -> None:
 
 
 def job_key(fixture: Fixture, kind: EventKind, platform: str, fmt: str) -> str:
-    """The spec's unique key: competition + season + source match ID + event + platform + format."""
+    """The spec's unique key, with the source added so two providers' match IDs can never collide.
+
+    competition + season + source + source match ID + event + platform + format.
+    """
     k = fixture.key
-    return f"{k.competition}:{k.season}:{k.source_match_id}:{kind}:{platform}:{fmt}"
+    return f"{k.competition}:{k.season}:{k.source}:{k.source_match_id}:{kind}:{platform}:{fmt}"
 
 
 def natural_key(fixture: Fixture, kind: EventKind, platform: str, fmt: str) -> str:

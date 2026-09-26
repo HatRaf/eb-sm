@@ -69,9 +69,9 @@ def test_team_catalog_rejects_bad_ids():
         TeamCatalog.model_validate({"version": 1, "teams": {"Olympiacos FC": {"name_en": "x"}}})
 
 
-def test_job_key_matches_spec():
+def test_job_key_is_spec_key_qualified_by_source():
     assert job_key(fixture(), EventKind.FINAL, "instagram", "feed-4x5") == (
-        "EUROLEAGUE:2026-27:E2026_42:FINAL:instagram:feed-4x5"
+        "EUROLEAGUE:2026-27:test-source:E2026_42:FINAL:instagram:feed-4x5"
     )
 
 

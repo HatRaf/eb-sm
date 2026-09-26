@@ -158,10 +158,14 @@ def _int(value: Any) -> int:
 
 def _periods(home: dict[str, Any], away: dict[str, Any]) -> tuple[tuple[int, int], ...]:
     periods = []
+    missing = None
     for name in _PERIODS:
         h, a = home.get(name), away.get(name)
         if h is None and a is None:
-            break
+            missing = missing or name
+            continue
+        if missing:
+            raise SourceFormatError(f"period {name} populated after missing {missing}")
         if h is None or a is None:
             raise SourceFormatError(f"period {name} present for only one team")
         periods.append((_int(h), _int(a)))

@@ -98,6 +98,17 @@ def test_one_sided_period_raises():
         src.parse_game(game, fetched_utc=FETCHED, source_asof_utc=None)
 
 
+@pytest.mark.parametrize("missing, later", [("q3", "q4"), ("ot1", "ot2")])
+def test_gapped_period_sequence_raises(missing, later):
+    # A later populated period after a missing one is malformed, not a shorter game.
+    game = game_obj("game_E2025_340_final_2ot.json")
+    for side in ("home", "away"):
+        game[side]["quarters"][missing] = None
+        game[side]["quarters"][later] = 5
+    with pytest.raises(SourceFormatError, match=later):
+        src.parse_game(game, fetched_utc=FETCHED, source_asof_utc=None)
+
+
 def test_raw_hash_tracks_content():
     game = game_obj("game_E2025_340_final_2ot.json")
     a = src.parse_game(game, fetched_utc=FETCHED, source_asof_utc=None)
@@ -118,8 +129,12 @@ def test_catalog_covers_every_2026_27_team():
         assert fx.home_team_id and fx.away_team_id, g.key
 
 
-def test_recorded_round_confirms_end_to_end():
-    """Replay each real final three times, 45 s apart, through catalog + detector."""
+def test_recorded_round_wiring_parser_catalog_detector():
+    """Wiring only: the SAME saved response re-parsed with invented fetch times.
+
+    This proves parser -> catalog -> detector fit together. It is not evidence that the
+    live feed produces fresh, evolving observations — that needs a recorded real game.
+    """
     catalog = TeamCatalog.load(ROOT / "config" / "teams.yaml")
     body = load("games_E2026_round1_finals.json")
     first_fetch = src.parse_games(body, FETCHED)[0].source_asof_utc + timedelta(seconds=1)

@@ -46,6 +46,7 @@ class Reason(enum.StrEnum):
     SOURCE_STALE = "source_stale"
     NO_FINAL_STATE = "no_final_state"
     WINDOW_PASSED = "window_passed"
+    IMPLAUSIBLE_TIMING = "implausible_timing"
     # confirmed
     CONFIRMED = "confirmed"
 
@@ -57,6 +58,9 @@ class DetectorConfig:
     stale_after: timedelta = timedelta(minutes=3)
     outage_hold_after: timedelta = timedelta(minutes=20)
     max_game_duration: timedelta = timedelta(hours=4)
+    # Earliest a source may report the state after scheduled tip-off (4x10 min play plus breaks).
+    min_final_after_tip: timedelta = timedelta(minutes=70)
+    min_halftime_after_tip: timedelta = timedelta(minutes=20)
 
 
 @dataclass(frozen=True)
@@ -133,6 +137,11 @@ def detect(
         return wait(Reason.IN_PROGRESS, f"source {last.raw_status!r}")
 
     window = obs[first:]
+    earliest = cfg.min_final_after_tip if kind is EventKind.FINAL else cfg.min_halftime_after_tip
+    elapsed = window[0].fetched_utc - fixture.start_utc
+    if elapsed < earliest:
+        when = f"{_fmt(-elapsed)} before" if elapsed < timedelta(0) else f"{_fmt(elapsed)} after"
+        return hold(Reason.IMPLAUSIBLE_TIMING, f"source reported {target} {when} scheduled tip-off")
     moved_on = next((o for o in window if o.status is not target), None)
     if moved_on is not None:
         if kind is EventKind.HALFTIME:
