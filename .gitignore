@@ -1,0 +1,37 @@
+# Secrets — never committed (see docs/ARCHITECTURE.md §11)
+.env
+.env.*
+!.env.example
+secrets/
+
+# Runtime state and outputs
+data/
+output/
+backup/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.db
+
+# Brand assets from Elena (fonts/logos/photos may carry licence limits): kept outside git.
+# Placeholder SAMPLE assets live in assets/sample/ and are committed.
+assets/*
+!assets/sample/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# Editors / OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store

@@ -1,0 +1,7 @@
+# LF everywhere: the app runs in a Linux container, and recorded fixtures must stay byte-exact.
+* text=auto eol=lf
+tests/fixtures/** -text
+*.png binary
+*.jpg binary
+*.ttf binary
+*.otf binary
