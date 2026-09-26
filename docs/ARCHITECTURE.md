@@ -70,21 +70,26 @@ Every source response becomes an `Observation` (the spec's record plus fetch met
   "away_score": 79,
   "period_scores": [[20, 18], [21, 22], [19, 20], [22, 19]],
   "status": "FINAL",
-  "source_updated_utc": "2026-10-02T18:58:41Z",
+  "raw_status": "result",
+  "current_period": null,
+  "source_asof_utc": "2026-10-02T18:58:41Z",
   "fetched_utc": "2026-10-02T18:58:44Z",
   "raw_sha256": "…"
 }
 ```
 
-- `status` ∈ `SCHEDULED | LIVE | HALFTIME | FINAL | POSTPONED | CANCELLED | ABANDONED | UNKNOWN`.
+- `status` ∈ `SCHEDULED | LIVE | HALFTIME | FINAL | POSTPONED | SUSPENDED | CANCELLED | ABANDONED | UNKNOWN`;
+  `raw_status` keeps the source's own string for diagnostics.
   Adapters map only **explicit** source states. A source value the adapter does not recognize maps
   to `UNKNOWN` (→ hold), never to the nearest guess. `HALFTIME` / `FINAL` are never inferred from a clock.
 - `source_match_id` and source team refs are opaque strings. Canonical `*_team_id` comes from
   `TeamCatalog`; an unmapped source team ⇒ hold.
 - All timestamps stored in UTC. Display uses `zoneinfo("Europe/Athens")`. (Windows has no system tz
   database — the `tzdata` package is a hard dependency.)
-- `source_updated_utc` may be `null` if the source has no such field; freshness then falls back to
-  HTTP `Last-Modified`/`Date` or `fetched_utc`, and the adapter declares which one it uses.
+- `source_asof_utc` (the spec's `source_updated_utc`) is the time the source asserts the data was current,
+  e.g. response generation time. `fetched_utc − source_asof_utc` exposes stale cached copies; such
+  observations don't count toward confirmation. `null` if the source offers nothing usable. A frozen
+  upstream can't be seen this way — the max-game-duration hold and an optional cross-check cover it.
 
 ## 4. Event detection rules
 
@@ -125,6 +130,9 @@ second post or replacement.
 
 Job key: `competition:season:source_match_id:event:platform:format`
 (e.g. `EUROLEAGUE:2026-27:E2026_12:FINAL:instagram:feed-4x5`). Unique in the ledger.
+A second guard, the *natural key* (competition, Athens calendar day, canonical teams, event, destination),
+catches the same game arriving under a new source ID (e.g. after switching score source); such a job is
+created `held` with reason `possible_duplicate`.
 
 ```
 event:  observed ─► confirmed                     (or held)

@@ -26,7 +26,7 @@ The 2026-27 season is already running: round 1 (24–25 Sep, `E2026_1…10`) is 
 - Scheduled games report `score: 0` and `q1..q4: 0` (zeros, not nulls) — never trust scores unless status says so.
 - OT seen: `E2025_340` `minute:"50:00"`, `ot1:13, ot2:13`; `E2025_168` 3OT `minute:"55:00"`.
 - Freshness: only envelope `metadata.createdAt` (response generation time, not data update time). No ETag/Last-Modified.
-  Adapter therefore reports `source_updated_utc = null` and freshness = fetch time.
+  The adapter uses it as `source_asof_utc`, which exposes stale cached copies but not a frozen upstream.
 - Tip-off: `date` in ISO UTC. `confirmedDate` / `confirmedTime` booleans exist (all true for 2026-27 right now).
 - No rate limiting or bot challenge seen across ~50 requests.
 
@@ -65,4 +65,24 @@ No licence to logos/trademarks. None of these APIs is publicly documented. → O
 
 ## Commercial feeds covering both
 
-*Research still running — to be filled in.*
+Docs and pricing pages only — **no API keys were used**, so every live-behaviour claim needs a free-key
+check. (api-sports.io blocks automated fetches; its evidence comes from Wayback copies, Dec 2025–Apr 2026.)
+
+| Provider | EuroLeague + GBL | Halftime / Final / after OT | Periods | Price at our volume | Role |
+|---|---|---|---|---|---|
+| API-Sports "API-Basketball" | both listed ("Euroleague", "A1") | `HT` / `FT` / `AOT` | Q1–Q4 + **one combined** `over_time` | PRO $15/mo: 7,500/day | Best budget candidate |
+| Highlightly | both named | "Half time" / "Finished" / "Finished after over time" | q1–q4 + one combined `overTime` | $6.99/mo: 7,500/day | Budget second opinion |
+| Sportradar Global Basketball | both, full live | no halftime (`pause`) / `ended` → `closed` / `aet` | each OT separate | enterprise; trial 1,000 calls/30 days | Too expensive; **holds exclusive official EuroLeague data distribution through 2031** |
+| Goalserve | both named | full status list unverified | q1–q4 + one `ot` | $150/mo | Costly |
+| Genius Sports (FIBA LiveStats) | GBL runs on it | `FINISHED` → `COMPLETE` (official) | regular vs OT | by permission | Only if the league grants access |
+| Sofascore / Flashscore | yes (UI) | — | — | — | Manual cross-check only; terms forbid automated/commercial use |
+
+Consequences:
+
+- A single budget feed (API-Sports) would give an **explicit halftime** for both competitions — the only
+  path so far that satisfies the spec's halftime rule for EuroLeague.
+- Merged overtime means the number of OTs is unknown: the caption could say "after overtime" but not "2OT",
+  and the OT consistency check can't run. The adapter would declare `per_overtime_scores=False`.
+- API-Sports' terms: "We do not provide a 'license' for the use and publication of the data… permission to
+  publish… must be requested… from the competent authorities." Buying a feed does not settle D7.
+- Sizing: 2 competitions × ~120 polls/h × ~4 h ≈ 1,000 calls/day — fits the $15 tier, not the free 100/day.

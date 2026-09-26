@@ -1,0 +1,25 @@
+# Non-secret settings. Secrets never go here (env / Docker secrets only).
+# Default is preview: detect and render, never publish. See docs/ARCHITECTURE.md §7.
+mode: preview
+display_timezone: Europe/Athens
+
+competitions:
+  EUROLEAGUE:
+    enabled: true
+    season: "2026-27"
+    source: euroleague-incrowd
+    final_posts: true
+    halftime_posts: false   # source has no explicit halftime state (OPEN_DECISIONS E11)
+  GBL:
+    enabled: false          # source not chosen yet (OPEN_DECISIONS D1)
+    season: "2026-27"
+    source: undecided
+    final_posts: true
+    halftime_posts: false
+
+detector:
+  confirm_count: 3
+  confirm_span_s: 90
+  stale_after_s: 180
+  outage_hold_after_s: 1200
+  max_game_duration_h: 4

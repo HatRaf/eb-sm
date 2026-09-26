@@ -1,0 +1,26 @@
+# Canonical team IDs (competition-independent) and explicit source mappings.
+# An unmapped source team holds the match — there is no fuzzy matching.
+# EuroLeague refs are the InCrowd `home.code` / `away.code` values for 2026-27.
+# names_el (Greek display forms, incl. genitive) are pending from Elena — OPEN_DECISIONS E5.
+version: 1
+teams:
+  anadolu-efes:     {name_en: Anadolu Efes,   source_refs: {euroleague-incrowd: [IST]}}
+  asvel:            {name_en: LDLC ASVEL,     source_refs: {euroleague-incrowd: [ASV]}}
+  barcelona:        {name_en: FC Barcelona,   source_refs: {euroleague-incrowd: [BAR]}}
+  baskonia:         {name_en: Baskonia,       source_refs: {euroleague-incrowd: [BAS]}}
+  bayern-munich:    {name_en: Bayern Munich,  source_refs: {euroleague-incrowd: [MUN]}}
+  besiktas:         {name_en: Besiktas,       source_refs: {euroleague-incrowd: [BES]}}
+  crvena-zvezda:    {name_en: Crvena Zvezda,  source_refs: {euroleague-incrowd: [RED]}}
+  dubai:            {name_en: Dubai,          source_refs: {euroleague-incrowd: [DUB]}}
+  fenerbahce:       {name_en: Fenerbahce,     source_refs: {euroleague-incrowd: [ULK]}}
+  hapoel-tel-aviv:  {name_en: Hapoel Tel Aviv, source_refs: {euroleague-incrowd: [HTA]}}
+  maccabi-tel-aviv: {name_en: Maccabi Tel Aviv, source_refs: {euroleague-incrowd: [TEL]}}
+  olimpia-milano:   {name_en: Olimpia Milano, source_refs: {euroleague-incrowd: [MIL]}}
+  olympiacos:       {name_en: Olympiacos,     source_refs: {euroleague-incrowd: [OLY]}}
+  panathinaikos:    {name_en: Panathinaikos,  source_refs: {euroleague-incrowd: [PAN]}}
+  paris:            {name_en: Paris Basketball, source_refs: {euroleague-incrowd: [PRS]}}
+  partizan:         {name_en: Partizan,       source_refs: {euroleague-incrowd: [PAR]}}
+  real-madrid:      {name_en: Real Madrid,    source_refs: {euroleague-incrowd: [MAD]}}
+  valencia:         {name_en: Valencia,       source_refs: {euroleague-incrowd: [PAM]}}
+  virtus-bologna:   {name_en: Virtus Bologna, source_refs: {euroleague-incrowd: [VIR]}}
+  zalgiris:         {name_en: Zalgiris,       source_refs: {euroleague-incrowd: [ZAL]}}

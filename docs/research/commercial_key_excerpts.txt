@@ -1,0 +1,61 @@
+Commercial basketball API research - raw key excerpts (fetched 2026-09-26)
+==========================================================================
+
+API-SPORTS "API-BASKETBALL"
+- Live site api-sports.io is behind a Cloudflare challenge (HTTP 403 to curl/WebFetch). Evidence taken from Wayback Machine copies.
+- OpenAPI spec (Wayback 2025-12-02): http://web.archive.org/web/20251202061810/https://api-sports.io/public/documentations/basketball-v1.yaml
+  -> file: apisports_basketball-v1_wayback_20251202.yaml ; status excerpt: excerpt_apisports_games_status.txt
+  "**Available status** NS : Not Started / Q1..Q4 (In Play) / OT : Over Time (In Play) / BT : Break Time (In Play) /
+   HT : Halftime (In Play) / FT : Game Finished (Game Finished) / AOT : After Over Time (Game Finished) /
+   POST / CANC / SUSP / AWD / ABD"   "> Games are updated every 15 seconds"
+  scores.home|away: quarter_1, quarter_2, quarter_3, quarter_4, over_time (single aggregate), total ; game id, team ids, timestamp (= tip-off unix time)
+  Headers: x-ratelimit-requests-limit / -remaining (per day), X-RateLimit-Limit / -Remaining (per minute)
+- Coverage (Wayback 2026-04-15): http://web.archive.org/web/20260415165522/https://api-sports.io/sports/basketball
+  rows "Euroleague" (Europe) and "A1" (Greece), all six columns checked (Schedule, Historical, Standings, Team stats, Player stats, Odds)
+  Pricing block same page: Free 100 req/day; PRO 7,500/day $15, 300 req/min; ULTRA 75,000/day $25, 450/min; MEGA 150,000/day $35, 900/min
+  "The daily request quota reset to zero every day at 00:00 UTC"
+- api-basketball.com pricing (Wayback 2025-07-14): "All our plans include all competitions and endpoints. (Free plans are limited in terms of available seasons)"
+- Terms (Wayback 2026-04-15) http://web.archive.org/web/20260415170717/https://api-sports.io/terms :
+  "We do not provide a "license" for the use and publication of the data ... Any license or permission to publish the data must be requested by the user from the competent authorities."
+  "The use of our data for betting platforms, television broadcasting, fantasy sports platforms, or any mass media distribution may require additional licenses from the relevant rights holders."
+  "The information concerning the frequency of data update provided in our documentations are given as an indication and are not guaranteed"
+- Unauthenticated probe https://v1.basketball.api-sports.io/leagues?search=euroleague -> 403 {"errors":{"token":"Missing application key..."}}
+
+SPORTRADAR GLOBAL BASKETBALL v2
+- FAQ https://developer.sportradar.com/basketball/reference/global-basketball-faq (file sportradar_global_basketball_faq.txt)
+  status: not_started, started, live, postponed, suspended, match_about_to_start, delayed, interrupted, cancelled, ended ("The game is over"), closed ("The game results have been confirmed"), abandoned
+  match_status: 1st_quarter, 2nd_quarter, 3rd_quarter, 4th_quarter, 1st_half, 2nd_half, overtime, penalties, pause, awaiting_extra_time, awaiting_penalties, interrupted, not_started, aet, ended, postponed, cancelled, abandoned, start_delayed, started, live
+  "When a sport_event is not covered live, the status and match_status will remain as not_started until results are entered post-match."
+- Sport Event Summary .md: "Update Frequency 1s Time To Live / Cache"; period_scores[] {home_score, away_score, number, type} ; type values include regular_period, overtime, 1st_quarter...; *_normaltime_score, *_overtime_score, generated_at
+- Coverage matrix public JSON (2026-09-26):
+  https://api.coverage-matrix.sm-row-prod.sportradar.com/api/packages/Global%20Basketball?&search=Euroleague -> sr:competition:138 "Euroleague" Live=2 ... Push=2
+  https://api.coverage-matrix.sm-row-prod.sportradar.com/api/packages/Global%20Basketball?&search=Greece -> sr:competition:304 "Basketball League" (Greece) Live=2 ... Push=2, season start 2026-10-03
+- Your Account .md https://developer.sportradar.com/getting-started/docs/your-account.md : "Our trials last 30 days"; "1,000 requests (quota) per rolling 30 days"; "1 QPS"; trial data "not throttled or updated at a lesser frequency"
+- Press release 2026-08-26 (GlobeNewswire): Sportradar "exclusive global distribution of Euroleague Basketball official data and AV betting rights" through 2031.
+
+GOALSERVE
+- https://www.goalserve.com/en/sport-data-feeds/nba-api/description : "live player stats for most popular leagues worldwide including Euroleague, Greece Basketball League, Spain ACB and more. Data updated every 3-5 seconds." "Free 14 days trial available."
+  sample XML: <match ... status="Finished" id="623345"><localteam ... q1 q2 q3 q4 ot totalscore id/>; statuses seen: "Finished", "4th Quarter", "Not Started"
+- https://www.goalserve.com/en/sport-data-feeds/nba-api/prices : "Basketball Live Score $150 (1 month) $700 (6 months) $1200 (12 months) 100+ leagues"
+
+THESPORTSDB
+- https://www.thesportsdb.com/pricing : Free $0 30 req/min; Single Developer $9/mo "2 min livescore (Soccer, NFL, NBA, MLB, NHL)" 100 req/min; Small Business $20/mo 120 req/min
+- https://www.thesportsdb.com/docs_api_data : Basketball status list NS, Q1-Q4, OT, BT, HT, FT, AOT, POST, CANC, SUSP, AWD, ABD
+- League ids: EuroLeague 4546 (https://www.thesportsdb.com/league/4546-euroleague-basketball); Greek Basket League 4452 (https://www.thesportsdb.com/season/4452-greek-basket-league/2025-2026 shows results e.g. 04 Oct 25 ASK Karditsas 91-77 Aris)
+- Terms https://www.thesportsdb.com/docs_terms_of_use.php : "must mention us as the source of the data"
+
+HIGHLIGHTLY (added candidate)
+- https://highlightly.net/basketball-api/ : "Basket League (Greece)", "Euroleague"; BASIC $0 100 req/day; PRO $6.99 7,500/day 12 rps; ULTRA $16.99 25,000/day; MEGA $39.99 60,000/day
+- https://highlightly.net/basketball-api/documentation/ states: Not started, First..Fourth quarter, Over time, Break time, Half time, Finished, "Finished after over time", Postponed, Cancelled, Suspended, Awarded, Abandoned, Unknown, To be announced; score {current,q1..q4,overTime}
+- Terms https://highlightly.net/terms/ : "Information concerning the frequency of data updates ... is given as an indication and is not guaranteed." No SLAs.
+
+GENIUS SPORTS
+- ESAKE uses FIBA LiveStats: https://fibalivestats.dcd.shared.geniussports.com/u/ESAKE/2015064/p.html (Genius Sports Group footer)
+- Warehouse REST docs https://developer.geniussports.com/warehouse/rest/index_basketball.html : matchStatus DRAFT, BYE, SCHEDULED, IN_PROGRESS, FINISHED ("finished, but not officially finalised"), COMPLETE ("officially finalised"), DELAYED, POSTPONED, CANCELLED, ABANDONED ; periodType REGULAR / OVERTIME ; "updated" filter ; key "applies any permissions or quotas"
+
+STATS PERFORM: https://www.statsperform.com/insights/crafting-next-gen-sports-apps-and-media-experiences-with-stats-performs-opta-apis/ "Stats Perform only sell data at an enterprise level."
+
+SPORTDEVS: sportdevs.com and docs.sportdevs.com do not resolve in DNS on 2026-09-26 (curl exit 6, WebFetch ENOTFOUND). Last Wayback capture 2025-10-02: "some endpoints refreshed every minute".
+
+FLASHSCORE terms https://www.flashscore.com/terms-of-use/ : "for your personal use only. You may not use the Site for any commercial purpose." ... "You may not burden our server ... with automated requests" ... "not permitted to use the content of the website by embedding, aggregating, scraping or recreating it without our express consent"
+SOFASCORE terms page returned 403 / JS-only -> not verified directly.
