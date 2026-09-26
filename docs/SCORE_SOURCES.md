@@ -60,8 +60,45 @@ No licence to logos/trademarks. None of these APIs is publicly documented. → O
 
 ## Greek Basket League (GBL)
 
-*Research still running — to be filled in.* EuroLeague feeds do **not** cover the current GBL
-(their `GR` competition stops at 2005-06).
+EuroLeague feeds do **not** cover the current GBL (their `GR` competition stops at 2005-06).
+The official site esake.gr embeds a Genius Sports "LIVE CENTER": live GBL data is **FIBA LiveStats (Genius)**.
+2026-27 round 1 is Sat 3 – Sun 4 Oct. Super Cup (same platform) is on 26–27 Sep.
+
+| Candidate | Explicit FINAL | Explicit HALFTIME | Periods / OT | Caching | Role |
+|---|---|---|---|---|---|
+| **B. FIBA LiveStats `data.json`** per match | no status field; pbp `game/end` event | none; pbp `period/end` of period 2 | `p1–p4_score` + **aggregate** `ot_score`; per-OT only via pbp | `max-age=30`, ETag → 304 | **Primary candidate** |
+| C. FIBA LiveStats competition JSON | `matchStatus:"COMPLETE"` | live values unverified | scores | same | Status cross-check; `matchTimeUTC` |
+| D. Genius hosted `ldata` competition JSON | JS references `COMPLETE`/`FINISHED` | JS references **`PERIODBREAK`** | ? | 403 outside live | Maybe the only explicit break state — *unverified* |
+| A. esake.gr HTML | none (score appears after the game) | none | Q1–Q4, `ΟΤ1…` (Greek letters) | no-cache | Greek names, logos, schedule cross-check; not live (≥45 min lag seen) |
+
+### B. FIBA LiveStats (primary candidate)
+
+- `GET https://fibalivestats.dcd.shared.geniussports.com/data/<matchId>/data.json` (~430 KB, ~31 KB gzipped).
+  Returns **403** until shortly before a game (2893081 was 403 at 16:14Z, 200 by 17:35Z for an 18:00Z tip).
+- Verified on the Super Cup final 2893080 (OLY 93–80 AEK): `pbp[0]` = `{"actionType":"game","subType":"end",
+  "period":4,"qualifier":["confirmed"],"s1":"93","s2":"80"}`; `tm."1"` home / `tm."2"` away with `score`,
+  `p1_score..p4_score`, Latin `name`, Greek `shortName` (`ΟΛΥ`). No team ID, no start time in this file.
+- OT (2855279, 2OT): `period` restarts (`period:2, periodType:"OVERTIME"`); `ot_score` is the OT total;
+  per-OT scores must be derived from pbp. On that game `game/end` had `qualifier:[]` — don't require "confirmed".
+- Genius edits after the game (Last-Modified ~20 min after the end) → a longer confirmation window for GBL.
+- matchIds are not on esake pages; discover via the esake Genius widget / webcast pages (`compId`).
+  2025-26 GBL compId `47322`, Super Cup 2026 `49913`; **2026-27 GBL compId not yet known.**
+
+### GBL consequences for the design
+
+1. "Status" is derived from play-by-play *events*, not a status field. `game/end` is an explicit
+   end-of-game event from the official scorer → acceptable as FINAL. Halftime would be the end of period 2 —
+   exactly what the spec rules out — unless `PERIODBREAK` in the hosted ldata feed proves usable (OPEN_DECISIONS E11).
+2. Canonical teams need a mapping of Genius team IDs (C/D) and esake `idteam` → canonical ID; data.json itself has none.
+3. **Live recording in progress:** PAO–PAOK Super Cup semi (2893081), 26 Sep 18:00Z, via `tools/record_feed.py`
+   (data.json 30 s, competition JSON 60 s, ldata 60 s). Results to be written up here.
+
+### Terms
+
+esake.gr terms (`/el/A19800D1`): prior written permission is required for any reproduction or transmission
+("θα πρέπει να ζητείται έγγραφη άδεια πριν από οποιαδήποτε αναπαραγωγή ή μετάδοση"); logos and trademarks
+need express prior written consent. FIBA LiveStats is a commercial Genius product with no public licence.
+→ OPEN_DECISIONS D7 covers GBL too.
 
 ## Commercial feeds covering both
 

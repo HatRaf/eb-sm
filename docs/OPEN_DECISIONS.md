@@ -24,10 +24,10 @@ interim default applies. Interim defaults never publish anything.
 
 | # | Decision | Recommendation | Status |
 |---|---|---|---|
-| D1 | Score source per competition | EuroLeague: InCrowd feed primary, live.euroleague.net cross-check. GBL: pending. See [SCORE_SOURCES.md](SCORE_SOURCES.md) | EuroLeague proposed; GBL open |
+| D1 | Score source per competition | EuroLeague: InCrowd feed primary, live.euroleague.net cross-check. GBL: FIBA LiveStats `data.json` (pbp `game/end`) primary, competition JSON cross-check — pending the live recording. Alternative for both: API-Sports (explicit HT/FT/AOT, merged OT). See [SCORE_SOURCES.md](SCORE_SOURCES.md) | EuroLeague proposed; GBL candidate |
 | D2 | Renderer | Pillow (deterministic, light, no browser). Revisit only if Elena's template needs effects Pillow can't reproduce. | proposed |
 | D3 | Confirmation window defaults | ≥3 consecutive explicit-final observations over ≥90 s; staleness limit 3 min | proposed; tune in shadow run |
 | D4 | Public image URL (only if Instagram is chosen: Meta fetches the image from a public URL) | external object store with short-lived/unguessable URLs; ThinkStation stays unexposed | waits on E1 |
 | D5 | Dead-man's-switch for "worker stopped checking games" | external heartbeat ping service; provider TBD | proposed |
 | D6 | Raw observation retention | 30 days, then keep hashes only | proposed |
-| D7 | Terms of use of the chosen data source(s) for a media brand's commercial posting. EuroLeague terms allow "legitimate news reporting or private, non-commercial purposes", require attribution to euroleague.net, and grant no logo rights. | Elena (possibly a lawyer) decides before live; shadow run is unaffected | open |
+| D7 | Terms of use of the chosen data source(s) for a media brand's commercial posting. EuroLeague terms allow "legitimate news reporting or private, non-commercial purposes", require attribution to euroleague.net, and grant no logo rights. ESAKE requires prior written permission for any reproduction/transmission and for logos. | Elena (possibly a lawyer) decides before live; shadow run is unaffected | open |
